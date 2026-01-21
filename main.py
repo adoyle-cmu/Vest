@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import ttk, simpledialog, messagebox
+from tkinter import ttk, simpledialog, messagebox, filedialog
 from fractions import Fraction
+import json
 
 class HeirloomApp:
     def __init__(self, root):
@@ -37,6 +38,12 @@ class HeirloomApp:
 
         self.generate_report_button = tk.Button(self.button_frame, text="Generate Report", command=self.generate_report)
         self.generate_report_button.pack(side="left", padx=10)
+
+        self.save_button = tk.Button(self.button_frame, text="Save", command=self.save_tree)
+        self.save_button.pack(side="right", padx=10)
+
+        self.load_button = tk.Button(self.button_frame, text="Load", command=self.load_tree)
+        self.load_button.pack(side="right", padx=10)
 
         self.clear_all_button = tk.Button(self.button_frame, text="Clear All", command=self.clear_all)
         self.clear_all_button.pack(side="right", padx=10)
@@ -85,6 +92,72 @@ class HeirloomApp:
                 color = "forest green"
 
         self.total_shares_label.config(text=f"Total Shares: {total_share} ({percentage:.4f}%)", fg=color)
+
+    def save_tree(self):
+        filename = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Files", "*.json")])
+        if not filename:
+            return
+
+        data = []
+        def traverse(item):
+            node = {
+                "id": item,
+                "parent": self.tree.parent(item),
+                "name": self.tree.item(item, "text"),
+                "share": str(self.shares.get(item, "0/1")),
+                "allocated_share": str(self.allocated_shares.get(item, "0/1"))
+            }
+            data.append(node)
+            for child in self.tree.get_children(item):
+                traverse(child)
+
+        for item in self.tree.get_children():
+             traverse(item)
+
+        try:
+            with open(filename, 'w') as f:
+                json.dump(data, f, indent=4)
+            messagebox.showinfo("Success", "Tree saved successfully.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save tree: {e}")
+
+    def load_tree(self):
+        filename = filedialog.askopenfilename(defaultextension=".json", filetypes=[("JSON Files", "*.json")])
+        if not filename:
+            return
+
+        if not messagebox.askokcancel("Load Tree", "Loading a tree will clear the current one. Continue?"):
+            return
+
+        try:
+            with open(filename, 'r') as f:
+                data = json.load(f)
+
+            self.tree.delete(*self.tree.get_children())
+            self.shares.clear()
+            self.allocated_shares.clear()
+            
+            for node in data:
+                item_id = node["id"]
+                parent_id = node["parent"]
+                name = node["name"]
+                share = Fraction(node["share"])
+                allocated_share = Fraction(node["allocated_share"])
+
+                # If parent is empty string, it's root level
+                if parent_id == "":
+                     parent_id = ""
+
+                # Insert with same ID
+                self.tree.insert(parent_id, "end", iid=item_id, text=name, values=(name, str(share)))
+                self.shares[item_id] = share
+                self.allocated_shares[item_id] = allocated_share
+
+            self.update_total_shares()
+            messagebox.showinfo("Success", "Tree loaded successfully.")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load tree: {e}")
 
     def add_original_owner(self):
         num_original_owners = len(self.tree.get_children())
