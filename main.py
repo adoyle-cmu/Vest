@@ -18,6 +18,7 @@ class HeirloomApp:
         self.tree.pack(expand=True, fill="both")
 
         self.shares = {}
+        self.allocated_shares = {}
 
         self.total_shares_label = tk.Label(self.root, text="", anchor="e", padx=10)
         self.total_shares_label.pack(side="bottom", fill="x")
@@ -95,6 +96,7 @@ class HeirloomApp:
         if dialog.name and dialog.share_fraction is not None:
             item_id = self.tree.insert("", "end", text=dialog.name, values=(dialog.name, str(dialog.share_fraction)))
             self.shares[item_id] = dialog.share_fraction
+            self.allocated_shares[item_id] = dialog.share_fraction
             self.update_total_shares()
 
     def convey_share(self):
@@ -105,7 +107,7 @@ class HeirloomApp:
         source_id = source_id[0]
 
         source_children = self.tree.get_children(source_id)
-        children_total_share = sum(self.shares.get(child, 0) for child in source_children)
+        children_total_share = sum(self.allocated_shares.get(child, 0) for child in source_children)
         source_remainder = self.shares[source_id] - children_total_share
 
         if source_remainder <= 0:
@@ -153,6 +155,7 @@ class HeirloomApp:
             
             item_id = self.tree.insert(selected_item, "end", text=dialog.name, values=(dialog.name, str(heir_share)))
             self.shares[item_id] = heir_share
+            self.allocated_shares[item_id] = heir_share
             self.update_total_shares()
 
     def edit_selected(self):
@@ -183,6 +186,7 @@ class HeirloomApp:
                 new_share = parent_share * dialog.share_fraction
                 self.tree.item(selected_item, text=dialog.name, values=(dialog.name, str(new_share)))
                 self.shares[selected_item] = new_share
+                self.allocated_shares[selected_item] = new_share
 
                 if new_share == 0:
                     self._set_children_shares_to_zero(selected_item)
@@ -202,6 +206,7 @@ class HeirloomApp:
                 new_share = dialog.share_fraction
                 self.tree.item(selected_item, text=dialog.name, values=(dialog.name, str(new_share)))
                 self.shares[selected_item] = new_share
+                self.allocated_shares[selected_item] = new_share
 
                 if new_share == 0:
                     self._set_children_shares_to_zero(selected_item)
@@ -218,12 +223,17 @@ class HeirloomApp:
             old_child_share = self.shares[child]
             new_child_share = old_child_share * factor
             self.shares[child] = new_child_share
+            
+            if child in self.allocated_shares:
+                self.allocated_shares[child] = self.allocated_shares[child] * factor
+            
             self.tree.item(child, values=(self.tree.item(child, "text"), str(new_child_share)))
             self._update_child_shares(child, factor)
 
     def _set_children_shares_to_zero(self, item):
         for child in self.tree.get_children(item):
             self.shares[child] = Fraction(0)
+            self.allocated_shares[child] = Fraction(0)
             self.tree.item(child, values=(self.tree.item(child, "text"), "0/1"))
             self._set_children_shares_to_zero(child)
 
@@ -241,12 +251,16 @@ class HeirloomApp:
                 delete_children(child)
                 if child in self.shares:
                     del self.shares[child]
+                if child in self.allocated_shares:
+                    del self.allocated_shares[child]
                 self.tree.delete(child)
 
         delete_children(selected_item)
         
         if selected_item in self.shares:
             del self.shares[selected_item]
+        if selected_item in self.allocated_shares:
+            del self.allocated_shares[selected_item]
         self.tree.delete(selected_item)
 
         if is_original_owner:
@@ -260,7 +274,7 @@ class HeirloomApp:
             claimants.append((self.tree.item(item, "text"), self.shares[item]))
             return
 
-        children_share = sum(self.shares.get(child, Fraction(0)) for child in children)
+        children_share = sum(self.allocated_shares.get(child, Fraction(0)) for child in children)
         parent_share = self.shares[item]
 
         if parent_share > children_share:
@@ -290,6 +304,7 @@ class HeirloomApp:
         for owner_id in original_owners:
             old_share = self.shares.get(owner_id, new_share) # Use new_share as default for new owners
             self.shares[owner_id] = new_share
+            self.allocated_shares[owner_id] = new_share
             self.tree.item(owner_id, values=(self.tree.item(owner_id, 'text'), str(new_share)))
             
             if old_share != 0:
