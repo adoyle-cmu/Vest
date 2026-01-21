@@ -503,7 +503,7 @@ class ConveyShareDialog:
         node_combobox['values'] = list(self.node_map.keys())
         node_combobox.pack(side="left", padx=5)
 
-        share_label = tk.Label(entry_frame, text="Share:")
+        share_label = tk.Label(entry_frame, text="Share (portion of remainder):")
         share_label.pack(side="left", padx=5)
 
         share_entry = tk.Entry(entry_frame, width=10)
@@ -512,8 +512,16 @@ class ConveyShareDialog:
         self.recipient_entries.append((node_var, share_entry))
 
     def ok(self):
-        total_conveyed = Fraction(0)
         conveyances = []
+        
+        try:
+            total_portion = sum(Fraction(share_entry.get()) for _, share_entry in self.recipient_entries)
+            if total_portion > 1:
+                messagebox.showerror("Error", "Total portion of remainder cannot exceed 1.", parent=self.top)
+                return
+        except (ValueError, ZeroDivisionError):
+            messagebox.showerror("Error", "Invalid fraction format in one of the share entries.", parent=self.top)
+            return
 
         for node_var, share_entry in self.recipient_entries:
             dest_name = node_var.get()
@@ -529,21 +537,17 @@ class ConveyShareDialog:
                 return
 
             try:
-                share_to_convey = Fraction(share_str)
-                if share_to_convey < 0:
+                portion = Fraction(share_str)
+                if portion < 0:
                     messagebox.showerror("Error", "Share cannot be negative.", parent=self.top)
                     return
                 
-                total_conveyed += share_to_convey
+                share_to_convey = self.remainder * portion
                 conveyances.append((dest_id, share_to_convey))
 
             except (ValueError, ZeroDivisionError):
                 messagebox.showerror("Error", f"Invalid fraction format for {dest_name}.", parent=self.top)
                 return
-
-        if total_conveyed > self.remainder:
-            messagebox.showerror("Error", "Total conveyed share exceeds the remainder.", parent=self.top)
-            return
 
         self.conveyances = conveyances
         self.top.destroy()
@@ -560,7 +564,7 @@ class ReportWindow:
         report_str = "Claimants Report:\n\n"
         for name, share in data:
             percentage = float(share) * 100
-            report_str += f"{name}: {share} ({percentage:.4f}%)\n"
+            report_str += f"{name}: {share} ({percentage:.4f}%)\n" if share != 0 else ''
         
         report_str += "\n"
         total_percentage = float(total_share) * 100
