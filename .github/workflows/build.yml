@@ -35,7 +35,7 @@ jobs:
       - name: Generate GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: windows/*.msi
+          files: dist\n*.msi
           body: "Official Windows installer for Chain of Title."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
