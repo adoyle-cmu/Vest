@@ -1,24 +1,41 @@
-name: Package Windows MSI
-on: [push]
+name: Create Production Release
+on:
+  push:
+    tags:
+      - 'v*' # This triggers only when you push a tag starting with 'v'
+    branches-ignore:
+      - '**' # This explicitly ignores standard branch pushes
 
 jobs:
-  build-windows:
+  build-and-release:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12' # Recommended for 2026 enterprise stability
+          python-version: '3.12'
+
       - name: Install Briefcase
         run: pip install briefcase
-      - name: Create & Package MSI
+
+      - name: Build MSI
+        # 'package' runs 'create' and 'build' automatically
+        run: briefcase package windows --no-input
+
+      - name: Sign MSI (Optional but Recommended)
+        # This step assumes you've added your cert to GitHub Secrets
+        # If you don't have a cert yet, skip this step for now.
+        shell: pwsh
         run: |
-          briefcase create windows --no-input
-          briefcase build windows --no-input
-          briefcase package windows --no-input
-      - name: Upload MSI
-        uses: actions/upload-artifact@v4
+          Write-Host "Signing the MSI..."
+          # signtool sign /f cert.pfx /p ${{ secrets.CERT_PASS }} windows/*.msi
+
+      - name: Generate GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: windows-installer
-          path: dist\*.msi
+          files: windows/*.msi
+          body: "Official Windows installer for Chain of Title."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
