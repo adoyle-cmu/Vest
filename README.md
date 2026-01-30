@@ -10,20 +10,14 @@ This application allows you to build an inheritance tree to track the division o
 
 -   Add multiple original owners (trunks).
 -   Add heirs to any person in the inheritance tree.
+-   Convey shares from one person to others.
 -   Specify shares as fractions (e.g., 1/2, 1/3).
 -   Generate a report of all current claimants and their final shares, both as fractions and percentages.
 
-## How to Run
-
-1.  Make sure you have Python 3 installed.
-2.  Run the `main.py` file:
-    ```bash
-    python main.py
-    ```
-
 ## How to Use
-
-1.  Click "Add Original Owner" to add the initial owner(s) of the property.
-2.  Select a person in the tree and click "Add Heir" to add a successor. You will be prompted to enter the heir's name and their share of the inheritance from the selected person.
-3.  Continue adding heirs to build the complete inheritance tree.
-4.  Once the tree is complete, click "Generate Report" to view a list of all the current claimants (leaves of the tree) and their calculated leasing right portions.
+1. Install Python (Should be installed on mac, can be downloaded from the software center on windows)
+2. Install git: https://git-scm.com/install/
+3. Open a terminal in your local user directory.
+4. Clone the repository: `git clone https://github.com/adoyle-cmu/ChainOfTitle.git`
+5. Navigate to the newly created ChainOfTitle directory in your file explorer, double click on 'main.py' to run the application.
+6. Optionally, create a shortcut to 'main.py' on your desktop for easier access in the future.
