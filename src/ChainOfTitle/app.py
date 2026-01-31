@@ -604,7 +604,7 @@ class ChainOfTitleApp(toga.App):
         self.option_container.content.append(label, tab_handler.container)
 
 def main():
-    return ChainOfTitleApp("ChainOfTitle", "org.chainoftitle")
+    return ChainOfTitleApp("ChainOfTitle", "com.petescheeks")
 
 if __name__ == '__main__':
     main().main_loop()
