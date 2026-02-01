@@ -1,1 +1,1 @@
-python -m nuitka --mode=standalone --follow-imports --windows-company-name="Aidan" --windows-product-name="ChainOfTitle" --windows-file-version="1.0.0" --windows-icon-from-ico=main.ico --enable-plugin=tk-inter --remove-output --windows-disable-console main.py
+python -m nuitka --mode=standalone --assume-yes-for-downloads --windows-company-name="Aidan" --windows-product-name="ChainOfTitle" --windows-file-version="1.0.0" --windows-icon-from-ico=main.ico --enable-plugin=tk-inter --remove-output --windows-console-mode=disable main.py
