@@ -4,15 +4,15 @@
 AppName=ChainOfTitle
 AppVersion={#AppVersion}
 DefaultDirName={autopf}\ChainOfTitle
-
-[Languages]
-Name: "english"; MessagesFile: "compiler:Default.isl"
 DefaultGroupName=ChainOfTitle
 UninstallDisplayIcon={app}\main.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=user_output
 OutputBaseFilename=ChainOfTitle_Setup
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
 
 
 
