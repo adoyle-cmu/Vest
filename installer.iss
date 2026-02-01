@@ -10,6 +10,8 @@ DefaultDirName={autopf}\Vest
 
 DefaultGroupName=Vest
 
+PrivilegesRequired=lowest
+
 UninstallDisplayIcon={app}\main.exe
 
 Compression=lzma2
