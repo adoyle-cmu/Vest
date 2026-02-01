@@ -40,6 +40,10 @@ Source: "main.dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs cre
 
 [Icons]
 
+
+
 Name: "{group}\Vest"; Filename: "{app}\main.exe"
 
-Name: "{commondesktop}\Vest"; Filename: "{app}\main.exe"
+
+
+Name: "{autodesktop}\Vest"; Filename: "{app}\main.exe"
